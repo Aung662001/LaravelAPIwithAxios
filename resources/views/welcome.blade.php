@@ -8,7 +8,18 @@
     <title>Laravel Api Axous</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 </head>
-<body class="pt-5">
+<body class="pt-5" style="position:relative">
+     {{-- create success alert --}}
+     <div style="display: none" id="successMsg"class=" alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Great!</strong> Create Successful
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {{-- delete success alete --}}
+      <div style="display: none" id="deleteMsg"class=" alert alert-danger alert-dismissible fade show" role="alert">
+         Delete Successful this item!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {{--  --}}
     <div class="container">
         <div class="row">
             <div class="col-md-8 pt-3">
@@ -28,17 +39,7 @@
                 </table>
             </div>
             <div class="col-md-4">
-                {{-- create success alert --}}
-                <div style="display: none" id="successMsg"class=" alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>Great!</strong> Create Successful
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  </div>
-                  {{-- delete success alete --}}
-                  <div style="display: none" id="deleteMsg"class=" alert alert-danger alert-dismissible fade show" role="alert">
-                     Delete Successful this item!
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  </div>
-                  {{--  --}}
+               
                 <h4>Create Post</h4>
                 <form id="addForm">
                 <div class="form-group">
@@ -89,9 +90,11 @@
     <script>
         //Read
         const tableBody = document.getElementById("tableBody");
+      const rerender =() =>{
+        tableBody.innerHTML = ""
         axios.get("api/post")
         .then((response)=>{
-            response.data.forEach(element => {
+          response.data.forEach(element => {
                 const trow = document.createElement("tr")
               const html=`
               <td>${element.id}</td>
@@ -110,16 +113,20 @@
                             </td>
               `  
               trow.innerHTML=html
-              tableBody.append(trow)
+              tableBody.append(trow) ;
             });
+           
         })
         .catch(error=>console.log(error.message))
+      }
+      rerender();
         //end Read
         //Create 
         
         const myForm = document.forms['addForm'];
         let title = myForm.title;
         let description = myForm.description;
+      
         myForm.onsubmit=(e)=>{
             e.preventDefault()
             axios.post("/api/post",{
@@ -127,8 +134,13 @@
                 description:description.value,
               
             }).then(response=>{
+                console.log(response.data);
                 const successMsg = document.getElementById("successMsg");
                 successMsg.style.display="block"
+                successMsg.style.position = "absolute"
+                //add to ui
+               rerender();
+              //end add to ui
                 setTimeout(()=>{
                         successMsg.style.display = "none"
                 },3000)
@@ -165,6 +177,7 @@
                     description:form.description.value
                  }).then(()=>{
                     console.log("success");
+                    rerender();
                  }).catch(()=>{
                     console.log("error");
                  })
@@ -176,6 +189,7 @@
      .then(()=>{
         const deleteMsg = document.getElementById("deleteMsg");
         deleteMsg.style.display="block";
+        rerender();
         setTimeout(() => {
             deleteMsg.style.display="none";
         }, 3000);
